@@ -21,9 +21,6 @@ class GameSprite(sprite.Sprite):
     def __init__(self, player_image, player_x, player_y, player_speed, w, h):
         super().__init__()
         self.image = transform.scale(image.load(player_image), (w, h))
-        # self.color = color
-        # self.image = Surface((w, h))
-        # self.image.fill(self.color)
         self.speed = player_speed
         self.rect = self.image.get_rect()
         self.rect.x = player_x
@@ -53,8 +50,6 @@ class Player(GameSprite):
 
 class Bullet(GameSprite):
     def update(self):
-        # if time_after - last_shoot = 5:
-        #     self.kill()
         if kill_bullet == True:
             self.kill()
 
@@ -147,6 +142,7 @@ while game:
 
     if rel_time:
         now_time = timer()
+        print(now_time)
         if now_time - last_shoot < 3:
             reload_shoot = font.Font(None, 36).render('RELOADING...', True, (255, 0, 0))
             mw.blit(reload_shoot, (W_mw - 290, 440))
