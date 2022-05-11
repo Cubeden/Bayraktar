@@ -8,10 +8,10 @@ font.init()
 mixer.init()
 
 W_mw = 1000
-H_mw = 900
+H_mw = 1000
 
 mw = display.set_mode((W_mw, H_mw))
-back = transform.scale(image.load('img/background.png'), (W_mw, H_mw))
+back =  transform.scale(image.load('img/background.png'), (W_mw, H_mw))
 clock = time.Clock()
 
 fire = mixer.Sound('sounds/fire.mp3')
@@ -44,7 +44,7 @@ class Player(GameSprite):
             self.rect.y += self.speed
 
     def fire(self):
-        bullet = Bullet('img/fire.png', self.rect.centerx, self.rect.centery, 0, 230, 175)
+        bullet = Bullet('img/fire.png', self.rect.x, self.rect.y, 0, 230, 175)
         bullets.add(bullet)
 
 class Bullet(GameSprite):
@@ -163,7 +163,6 @@ rel_time = False
 kill_bullet = False
 spawn_time = False
 score_time = False
-shoot = True
 
 def score_plus():
     global score_timer
@@ -185,24 +184,15 @@ while game:
 
         elif e.type == KEYDOWN:
             if e.key == K_SPACE:
-                if shoot:
+                if num_fire <= 1 and rel_time == False:
+                    num_fire += 1
+                    fire.play()
+                    p.fire()
+                    kill_bullet = False
 
-                    if num_fire <= 1 and rel_time == False:
-                        num_fire += 1
-                        fire.play()
-                        p.fire()
-                        kill_bullet = False
-
-                    if num_fire >= 1 and rel_time == False:
-                        rel_time = True
-                        last_shoot = timer()
-                        
-                    if sprite.spritecollide(p, enemys, False):
-                        obj_before = len(enemys)
-                        if sprite.spritecollide(p, enemys, True):
-                            obj_after = len(enemys)
-                            kill_obj = obj_before - obj_after
-                            score += 50*kill_obj
+                if num_fire >= 1 and rel_time == False:
+                    rel_time = True
+                    last_shoot = timer()
 
     mw.blit(back, (0,0))
     score_txt = font.Font(None, 36).render('Очки: ' + str(score), True, (0, 255, 0))
@@ -221,26 +211,35 @@ while game:
 
     if rel_time:
         now_time = timer()
-        if now_time - last_shoot < 3:
-            shoot = False
+        if now_time - last_shoot > 3:
             reload_shoot = font.Font(None, 36).render('RELOADING...', True, (255, 0, 0))
             mw.blit(reload_shoot, (W_mw - 290, 440))
+
         else:
             num_fire = 0
             rel_time = False
             kill_bullet = True
-            shoot = True
 
     if spawn_time:
         spawn_now = timer()
-        if spawn_now - spawn_timer > 3:
+        if spawn_now - spawn_timer > 8:
             spawn_random()
-            
+
     if score_time:
         score_now = timer()
         if score_now - score_timer > 1:
             score += 5
             score_plus()
+
+
+
+    key_p = key.get_pressed()
+    
+    if sprite.spritecollide(p, enemys, False) and key_p[K_SPACE]:
+        collides = sprite.spritecollide(p, enemys, True)
+        if collides:
+            score += 50
+        
 
     display.update()
     clock.tick(60)
